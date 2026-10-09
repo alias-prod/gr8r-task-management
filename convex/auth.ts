@@ -9,19 +9,33 @@ import authConfig from "./auth.config";
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
-export const createAuth = (ctx: GenericCtx<DataModel>) => {
-  // Convex's hosted development runtime does not use Next.js's NODE_ENV.
-  const development = process.env.NODE_ENV === "development" || process.env.AUTH_ENV === "development";
-  const baseURL = process.env.BETTER_AUTH_URL ??
+function getAuthBaseURL() {
+  return process.env.BETTER_AUTH_URL ??
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
         : process.env.V0_RUNTIME_URL);
+}
+
+export const createAuth = (ctx: GenericCtx<DataModel>) => {
+  // Convex's hosted development runtime does not use Next.js's NODE_ENV.
+  const development = process.env.NODE_ENV === "development" || process.env.AUTH_ENV === "development";
+  const baseURL = getAuthBaseURL();
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
   return betterAuth({
     baseURL,
     database: authComponent.adapter(ctx),
     emailAndPassword: { enabled: true, autoSignIn: true, minPasswordLength: 8, maxPasswordLength: 128 },
+    socialProviders: googleClientId && googleClientSecret && baseURL ? {
+      google: {
+        clientId: googleClientId,
+        clientSecret: googleClientSecret,
+        prompt: "select_account",
+        accessType: "online",
+      },
+    } : {},
     trustedOrigins: [
       ...(baseURL ? [baseURL] : []),
       ...(development ? [
@@ -42,6 +56,18 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
     plugins: [convex({ authConfig })],
   });
 };
+
+export const googleSignInConfig = query({
+  args: {},
+  returns: v.object({ enabled: v.boolean(), authOrigin: v.union(v.string(), v.null()) }),
+  handler: async () => {
+    const baseURL = getAuthBaseURL();
+    return {
+      enabled: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && baseURL),
+      authOrigin: baseURL ? new URL(baseURL).origin : null,
+    };
+  },
+});
 
 export const currentUser = query({
   args: {},
