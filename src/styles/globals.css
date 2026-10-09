@@ -5,6 +5,8 @@
    ============================================================ */
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
+.bg-background{background:var(--bg)}
+.persistence-notice{position:fixed;inset:12px 12px auto auto;z-index:400;max-width:min(520px,calc(100vw - 24px));display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--r-sm);box-shadow:var(--shadow-sm)}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:var(--fs);line-height:1.45;-webkit-font-smoothing:antialiased;overflow:hidden;font-feature-settings:"ss01","cv11"}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}

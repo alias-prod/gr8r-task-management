@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { api } from "../convex/_generated/api";
 import schema from "../convex/schema";
 
-const modules = import.meta.glob("../convex/**/!(*.*.*)*.*s");
+const modules = import.meta.glob(["../convex/**/*.{ts,js}", "!../convex/**/*.d.ts"]);
 const page = { cursor: null, numItems: 25 };
 
 async function fixture() {

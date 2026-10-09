@@ -6,7 +6,8 @@ import { Icon } from "@/components/icons/icon";
 import { Avatar } from "@/components/ui/avatar";
 import { allTasks, isOverdue, me, visibleProjects } from "@/lib/workspace";
 import { projectColor, PROJECT_STATUS } from "@/lib/vocab";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 import { useUiStore } from "@/store/ui-store";
 import { usePrefs, useWorkspaceData } from "@/store/workspace-store";
 import type { Project } from "@/types/workspace";
@@ -41,7 +42,20 @@ export default function Sidebar() {
   const prefs = usePrefs();
   const collapsed = useUiStore((state) => state.collapsed);
   const toggleSide = useUiStore((state) => state.toggleSide);
-  const logout = useAuthStore((state) => state.logout);
+  const [signOutError, setSignOutError] = useState("");
+  const [signingOut, setSigningOut] = useState(false);
+  const logout = async () => {
+    setSigningOut(true);
+    setSignOutError("");
+    try {
+      const result = await authClient.signOut();
+      if (result.error) throw new Error("Sign out failed");
+      window.location.assign("/login");
+    } catch {
+      setSignOutError("Could not sign out. Please try again.");
+      setSigningOut(false);
+    }
+  };
   const openCreate = useUiStore((state) => state.openCreate);
   const setMobileNav = useUiStore((state) => state.setMobileNav);
 
@@ -125,6 +139,7 @@ export default function Sidebar() {
         </div>
       </div>
       <div className="side-bot">
+        {signOutError ? <p role="alert" className="err">{signOutError}</p> : null}
         <Link href="/settings" className={`sitem ${active(pathname, "/settings") ? "on" : ""}`} onClick={closeMobile}>
           <Icon name="settings" size={16} />
           <span>Settings</span>
@@ -132,7 +147,7 @@ export default function Sidebar() {
         <div className="sitem" style={{ height: 36 }}>
           <Avatar id={person.id} presence />
           <span className="trunc" style={{ color: "var(--text)", fontWeight: 500 }}>{prefs.name}</span>
-          <button className="ct" onClick={logout} aria-label="Sign out" title="Sign out">
+          <button className="ct" onClick={logout} disabled={signingOut} aria-label="Sign out" title="Sign out">
             <Icon name="log-out" size={13} />
           </button>
         </div>

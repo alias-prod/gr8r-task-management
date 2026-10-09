@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import "../styles/globals.css";
+import ConvexProvider from "@/components/providers/convex-provider";
 
 export const metadata = {
   title: "Gr8r Studio",
@@ -8,13 +9,13 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-background">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />
       </head>
-      <body>{children}</body>
+      <body><ConvexProvider>{children}</ConvexProvider></body>
     </html>
   );
 }

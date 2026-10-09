@@ -5,7 +5,10 @@ import { Icon } from "@/components/icons/icon";
 import { Avatar } from "@/components/ui/avatar";
 import { PriorityIcon, StatusIcon } from "@/components/ui/status";
 import { ago } from "@/lib/dates";
-import { commentsOf, memberById, projectById } from "@/lib/workspace";
+import { memberById, projectById } from "@/lib/workspace";
+import { usePaginatedQuery } from "convex/react";
+import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 import { labelById, priorityName, projectColor, STATUSES, statusName } from "@/lib/vocab";
 import { useUiStore } from "@/store/ui-store";
 import { useWorkspaceData, useWorkspaceStore } from "@/store/workspace-store";
@@ -19,12 +22,17 @@ export function TaskDrawer() {
   const toggleSubtask = useWorkspaceStore((state) => state.toggleSubtask);
   const addComment = useWorkspaceStore((state) => state.addComment);
   const [draft, setDraft] = useState("");
+  const [subtaskTitle, setSubtaskTitle] = useState("");
+  const addSubtask = useWorkspaceStore((state) => state.addSubtask);
+  const pending = useWorkspaceStore((state) => state.pending);
+  const error = useWorkspaceStore((state) => state.error);
+  const commentPage = usePaginatedQuery(api.comments.list, taskId ? { taskId: taskId as Id<"tasks"> } : "skip", { initialNumItems: 25 });
 
   const task = data.tasks.find((item) => item.id === taskId);
   if (!task) return null;
   const project = projectById(data, task.project);
   const assignee = memberById(data, task.assignee);
-  const comments = commentsOf(data, task.id);
+  const comments = [...commentPage.results].reverse().map((comment) => ({ id: comment._id, by: comment.authorId, at: comment.createdAt, text: comment.text }));
 
   return (
     <>
@@ -96,6 +104,15 @@ export function TaskDrawer() {
               ))}
             </div>
           ) : null}
+          <form className="row" style={{ marginTop: 16 }} onSubmit={async (event) => {
+            event.preventDefault();
+            if (pending || !subtaskTitle.trim()) return;
+            if (await addSubtask(task.id, subtaskTitle)) setSubtaskTitle("");
+          }}>
+            <label className="sr" htmlFor="subtask-title">Subtask title</label>
+            <input id="subtask-title" className="input" value={subtaskTitle} onChange={(event) => setSubtaskTitle(event.target.value)} placeholder="Add a subtask" maxLength={200} required />
+            <button type="submit" className="btn btn-secondary" disabled={pending}>Add subtask</button>
+          </form>
           <div style={{ marginTop: 22 }}>
             <div className="eyebrow" style={{ marginBottom: 8 }}>Comments</div>
             {comments.map((comment) => {
@@ -111,18 +128,21 @@ export function TaskDrawer() {
                 </div>
               );
             })}
+            {commentPage.status === "LoadingFirstPage" ? <p role="status">Loading comments…</p> : null}
+            {commentPage.status === "CanLoadMore" ? <button className="btn btn-secondary" onClick={() => commentPage.loadMore(25)}>Earlier comments</button> : null}
+            {error ? <p className="err" role="alert">{error}</p> : null}
             <form
               className="cbox"
-              onSubmit={(event) => {
+              onSubmit={async (event) => {
                 event.preventDefault();
-                addComment(task.id, draft);
-                setDraft("");
+                if (pending || !draft.trim()) return;
+                if (await addComment(task.id, draft)) setDraft("");
               }}
             >
               <textarea value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Write a comment" aria-label="Comment" />
               <div className="row">
                 <span className="sp" />
-                <button className="btn btn-primary btn-sm" type="submit">Comment</button>
+                <button className="btn btn-primary btn-sm" type="submit" disabled={pending || !draft.trim()}>{pending ? "Saving…" : "Comment"}</button>
               </div>
             </form>
           </div>

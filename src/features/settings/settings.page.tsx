@@ -16,7 +16,7 @@ const ACCENTS = [
   ["violet", "#7348CC"],
   ["teal", "#1A7F7A"],
   ["rose", "#B93D68"],
-  ["graphite", "#34332F"],
+  ["slate", "#34332F"],
 ] as const;
 
 export default function SettingsPage() {
@@ -27,7 +27,7 @@ export default function SettingsPage() {
   const saveProfile = useWorkspaceStore((state) => state.saveProfile);
   const [section, setSection] = useState<"workspace" | "appearance" | "profile">("appearance");
   const [wsName, setWsName] = useState(data.ws.name);
-  const [wsUrl, setWsUrl] = useState(data.ws.url);
+  const pending = useWorkspaceStore((state) => state.pending);
   const [name, setName] = useState(prefs.name);
   const [title, setTitle] = useState(prefs.title);
   const [saved, setSaved] = useState("");
@@ -52,7 +52,7 @@ export default function SettingsPage() {
           {section === "appearance" ? (
             <>
               <h1>Appearance</h1>
-              <p className="lead">Customize how Gr8r looks on this device.</p>
+              <p className="lead">Customize how Gr8r looks across your devices.</p>
               <div className="sblock" style={{ marginTop: 0 }}>
                 <h2>Theme</h2>
                 <div className="seg" style={{ marginTop: 12 }}>
@@ -85,11 +85,11 @@ export default function SettingsPage() {
           {section === "workspace" ? (
             <>
               <h1>Workspace</h1>
-              <p className="lead">Your workspace name and address.</p>
-              <form className="col" style={{ gap: 14, maxWidth: 440 }} onSubmit={(event) => { event.preventDefault(); saveWorkspace(wsName, wsUrl); setSaved("Workspace saved"); }}>
+              <p className="lead">Your private workspace name and identifier.</p>
+              <form className="col" style={{ gap: 14, maxWidth: 440 }} onSubmit={async (event) => { event.preventDefault(); setSaved(""); if (await saveWorkspace(wsName)) setSaved("Workspace saved"); }}>
                 <div className="field"><label className="label" htmlFor="ws-name">Workspace name</label><input id="ws-name" className="input" value={wsName} onChange={(event) => setWsName(event.target.value)} /></div>
-                <div className="field"><label className="label" htmlFor="ws-url">Workspace URL</label><input id="ws-url" className="input" value={wsUrl} onChange={(event) => setWsUrl(event.target.value)} /></div>
-                <div><button className="btn btn-primary" type="submit">Save changes</button></div>
+                <div className="field"><label className="label" htmlFor="ws-id">Workspace ID</label><input id="ws-id" className="input" value={data.ws.url} readOnly /></div>
+                <div><button className="btn btn-primary" type="submit" disabled={pending}>Save changes</button></div>
                 {saved ? <span className="hint">{saved}</span> : null}
               </form>
             </>
@@ -98,11 +98,11 @@ export default function SettingsPage() {
             <>
               <h1>Profile</h1>
               <p className="lead">How you appear to the rest of the workspace.</p>
-              <form className="col" style={{ gap: 14, maxWidth: 440 }} onSubmit={(event) => { event.preventDefault(); saveProfile(name, title); setSaved("Profile saved"); }}>
+              <form className="col" style={{ gap: 14, maxWidth: 440 }} onSubmit={async (event) => { event.preventDefault(); setSaved(""); if (await saveProfile(name, title)) setSaved("Profile saved"); }}>
                 <div className="field"><label className="label" htmlFor="pf-name">Full name</label><input id="pf-name" className="input" value={name} onChange={(event) => setName(event.target.value)} /></div>
                 <div className="field"><label className="label" htmlFor="pf-title">Title</label><input id="pf-title" className="input" value={title} onChange={(event) => setTitle(event.target.value)} /></div>
                 <div className="field"><label className="label" htmlFor="pf-email">Email</label><input id="pf-email" className="input" value={data.members.find((member) => member.id === data.me)?.email || ""} disabled /></div>
-                <div><button className="btn btn-primary" type="submit">Save profile</button></div>
+                <div><button className="btn btn-primary" type="submit" disabled={pending}>Save profile</button></div>
                 {saved ? <span className="hint">{saved}</span> : null}
               </form>
             </>

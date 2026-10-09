@@ -2,8 +2,6 @@
 
 import { create } from "zustand";
 
-const SIDE_KEY = "gr8r.side";
-
 type UiState = {
   collapsed: boolean;
   mobileNav: boolean;
@@ -23,14 +21,8 @@ export const useUiStore = create<UiState>((set, get) => ({
   mobileNav: false,
   taskId: null,
   creating: false,
-  hydrate: () => {
-    if (localStorage.getItem(SIDE_KEY) === "1") set({ collapsed: true });
-  },
-  toggleSide: () => {
-    const collapsed = !get().collapsed;
-    localStorage.setItem(SIDE_KEY, collapsed ? "1" : "0");
-    set({ collapsed });
-  },
+  hydrate: () => {},
+  toggleSide: () => set({ collapsed: !get().collapsed }),
   setMobileNav: (mobileNav) => set({ mobileNav }),
   openTask: (taskId) => set({ taskId }),
   closeTask: () => set({ taskId: null }),

@@ -11,6 +11,7 @@ import { canSee, progressOf, tasksOf, visibleProjects } from "@/lib/workspace";
 import { projectColor, PROJECT_STATUS } from "@/lib/vocab";
 import { useWorkspaceData, useWorkspaceStore } from "@/store/workspace-store";
 import type { Project, ProjectStatus } from "@/types/workspace";
+import { NewProjectForm } from "./new-project-form";
 
 export function listProjects(data: ReturnType<typeof useWorkspaceData>) {
   return visibleProjects(data);
@@ -75,7 +76,8 @@ export default function ProjectsPage() {
   return (
     <div className="page wide" style={{ maxWidth: 1280 }}>
       <PageHeader title="Projects" text={`${all.filter((project) => project.status !== "complete").length} active · ${all.filter((project) => project.status === "complete").length} completed`} />
-      <div className="row" style={{ marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+      <NewProjectForm />
+      <div className="row" style={{ marginBlock: 16, flexWrap: "wrap", gap: 8 }}>
         <div className="inwrap">
           <Icon name="search" size={13} />
           <input className="input search-sm" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects" aria-label="Search projects" />
@@ -88,7 +90,7 @@ export default function ProjectsPage() {
         </select>
       </div>
       {projects.length ? <div className="pgrid">{projects.map((project) => <ProjectCard key={project.id} project={project} />)}</div> : (
-        <div className="panel"><EmptyState icon="search-x" title="No results found" text="No projects match your search or filters." /></div>
+        <div className="panel"><EmptyState icon="search-x" title={all.length ? "No results found" : "No projects yet"} text={all.length ? "No projects match your search or filters." : "Create your first project to start adding tasks."} /></div>
       )}
     </div>
   );

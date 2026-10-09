@@ -14,6 +14,8 @@ export function NewTaskModal() {
   const openTask = useUiStore((state) => state.openTask);
   const data = useWorkspaceData();
   const addTask = useWorkspaceStore((state) => state.addTask);
+  const pending = useWorkspaceStore((state) => state.pending);
+  const error = useWorkspaceStore((state) => state.error);
   const projects = visibleProjects(data).filter((project) => project.status !== "complete");
   const [title, setTitle] = useState("");
   const [projectId, setProjectId] = useState(projects[0]?.id || "");
@@ -34,10 +36,12 @@ export function NewTaskModal() {
         </div>
         <form
           className="modal-b"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
-            if (!title.trim() || !projectId) return;
-            const id = addTask({ title, projectId, assignee, priority, due: due || null });
+            const selectedProject = projectId || projects[0]?.id;
+            if (!title.trim() || !selectedProject || pending) return;
+            const id = await addTask({ title, projectId: selectedProject, assignee, priority, due: due || null });
+            if (!id) return;
             setTitle("");
             closeCreate();
             openTask(id);
@@ -49,7 +53,7 @@ export function NewTaskModal() {
           </div>
           <div className="field">
             <label className="label" htmlFor="task-project">Project</label>
-            <select id="task-project" className="select" value={projectId} onChange={(event) => setProjectId(event.target.value)}>
+            <select id="task-project" className="select" value={projectId || projects[0]?.id || ""} onChange={(event) => setProjectId(event.target.value)}>
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>{project.name}</option>
               ))}
@@ -80,7 +84,9 @@ export function NewTaskModal() {
           <div className="modal-f" style={{ margin: "0 -16px -14px", padding: "12px 16px" }}>
             <span className="sp" />
             <button type="button" className="btn btn-secondary" onClick={closeCreate}>Cancel</button>
-            <button type="submit" className="btn btn-primary">Create task</button>
+            {error ? <p role="alert" className="err">{error}</p> : null}
+            {!projects.length ? <p>Create a project first on the Projects page.</p> : null}
+            <button type="submit" className="btn btn-primary" disabled={pending || !projects.length}>{pending ? "Saving…" : "Create task"}</button>
           </div>
         </form>
       </div>
