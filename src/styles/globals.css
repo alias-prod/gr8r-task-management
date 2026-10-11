@@ -701,7 +701,7 @@ table.tbl{border-collapse:separate;border-spacing:0;table-layout:fixed;font-size
 .auth-c{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px 40px}
 .auth-card{width:100%;max-width:380px;display:flex;flex-direction:column;gap:16px}
 .auth-card h1{font-size:var(--fs-2xl);font-weight:600;letter-spacing:-.022em;margin:0;text-align:center}
-.auth-card .sub{text-align:center;color:var(--text-2);margin:-8px 0 4px}
+.auth-card .sub{display:block;padding:0;border:0;text-align:center;color:var(--text-2);margin:-8px 0 4px}
 .or{display:flex;align-items:center;gap:10px;color:var(--text-3);font-size:var(--fs-xs)}
 .or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
 .social{display:flex;flex-direction:column;gap:8px}
