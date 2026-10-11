@@ -9,7 +9,7 @@ import { GoogleSignInButton } from "./google-sign-in";
 function AuthCard({ title, sub, children }: { title: string; sub: string; children: ReactNode }) {
   return (
     <main className="auth">
-      <div className="auth-top"><Link href="/login" className="row" style={{ fontWeight: 600, gap: 8 }}><span className="ws-logo brand" style={{ width: 22, height: 22 }}>G</span>Gr8r Studio</Link></div>
+      <div className="auth-top"><Link href="/login" className="row" style={{ fontWeight: 600, gap: 8 }}><span className="ws-logo brand" style={{ width: 22, height: 22 }} aria-hidden="true">A</span>ALIAS TASK</Link></div>
       <div className="auth-c"><div className="auth-card"><h1>{title}</h1><p className="sub">{sub}</p>{children}</div></div>
     </main>
   );

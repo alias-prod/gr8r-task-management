@@ -64,7 +64,7 @@ export default function Topbar() {
             <span className="cur">{member.name}</span>
           </>
         ) : (
-          <span className="cur">{NAMES[pathname] || "Gr8r Studio"}</span>
+          <span className="cur">{NAMES[pathname] || "ALIAS TASK"}</span>
         )}
       </nav>
       <span className="sp" />

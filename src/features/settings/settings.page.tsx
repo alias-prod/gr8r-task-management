@@ -52,7 +52,7 @@ export default function SettingsPage() {
           {section === "appearance" ? (
             <>
               <h1>Appearance</h1>
-              <p className="lead">Customize how Gr8r looks across your devices.</p>
+              <p className="lead">Customize how ALIAS TASK looks across your devices.</p>
               <div className="sblock" style={{ marginTop: 0 }}>
                 <h2>Theme</h2>
                 <div className="seg" style={{ marginTop: 12 }}>

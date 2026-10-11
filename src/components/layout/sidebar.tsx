@@ -72,10 +72,8 @@ export default function Sidebar() {
       <div className="side-top">
         <div className="row" style={{ gap: 2 }}>
           <Link href="/" className="ws grow" onClick={closeMobile}>
-            <span className="ws-logo brand">
-              <img src="/gr8r-logo.png" alt="" />
-            </span>
-            <span className="ws-name trunc">{data.ws.name}</span>
+            <span className="ws-logo brand" aria-hidden="true">A</span>
+            <span className="ws-name trunc" title={data.ws.name}>ALIAS TASK</span>
             <span className="chev-d faint">
               <Icon name="chevrons-up-down" size={13} />
             </span>

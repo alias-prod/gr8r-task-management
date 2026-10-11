@@ -3,8 +3,8 @@ import "../styles/globals.css";
 import ConvexProvider from "@/components/providers/convex-provider";
 
 export const metadata = {
-  title: "Gr8r Studio",
-  description: "Gr8r Studio — a calm, structured project management workspace.",
+  title: "ALIAS TASK",
+  description: "ALIAS TASK — a calm, structured project management workspace.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
