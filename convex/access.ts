@@ -1,6 +1,6 @@
 import { ConvexError } from "convex/values";
 import { entsTableFactory } from "convex-ents";
-import type { Id } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { authComponent, createAuthOptions, getOrganizationMembership, normalizeOrganizationRole } from "./auth";
 import { entDefinitions } from "./schema";
@@ -44,11 +44,27 @@ export function requireWorkspaceAdmin(role: WorkspaceRole) {
   if (role !== "owner" && role !== "admin") throw new ConvexError("An organization owner or admin is required.");
 }
 
+export function canAccessProject(project: Doc<"projects">, memberId: Id<"members">) {
+  return project.private === false || project.leadId === memberId || Boolean(project.memberIds?.includes(memberId));
+}
+
+export async function filterProjectRecords<T extends { projectId: Id<"projects"> }>(ctx: ReadContext, rows: T[], access: Awaited<ReturnType<typeof requireWorkspace>>) {
+  const projects = new Map<Id<"projects">, Promise<Doc<"projects"> | null>>();
+  const visible = await Promise.all(rows.map(async row => {
+    let project = projects.get(row.projectId);
+    if (!project) { project = ctx.db.get(row.projectId); projects.set(row.projectId, project); }
+    const document = await project;
+    return Boolean(document && document.workspaceId === access.workspace._id && canAccessProject(document, access.member._id));
+  }));
+  return rows.filter((_row, index) => visible[index]);
+}
+
 export async function requireProject(ctx: ReadContext, id: Id<"projects">) {
   await requireIdentity(ctx);
   const project = await ctx.db.get(id);
   if (!project) throw new ConvexError("Project not found or access denied.");
   const access = await requireWorkspace(ctx, project.workspaceId);
+  if (!canAccessProject(project, access.member._id)) throw new ConvexError("Project not found or access denied.");
   return { ...access, project };
 }
 
@@ -67,12 +83,14 @@ export async function requireAssignee(
   ctx: ReadContext,
   workspaceId: Id<"workspaces">,
   memberId: Id<"members"> | null,
+  project?: Doc<"projects">,
 ) {
   if (memberId === null) return;
   const member = await ctx.db.get(memberId);
   if (!member || member.workspaceId !== workspaceId) {
     throw new ConvexError("Choose an assignee from this workspace.");
   }
+  if (project && !canAccessProject(project, member._id)) throw new ConvexError("Choose a project member as the assignee.");
   const workspace=await ctx.db.get(workspaceId);
   if(workspace?.organizationId){
     const actual=member.authUserId?await authComponent.adapter(ctx)(createAuthOptions(ctx)).findOne<{role:string}>({model:"member",where:[{field:"organizationId",value:workspace.organizationId},{field:"userId",value:member.authUserId}]}):null;

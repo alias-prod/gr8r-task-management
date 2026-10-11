@@ -59,6 +59,9 @@ export const memberFields = {
 
 export const projectFields = {
   workspaceId: v.id("workspaces"),
+  // Legacy projects were labelled private in the UI. Missing fields stay private.
+  private: v.optional(v.boolean()),
+  memberIds: v.optional(v.array(v.id("members"))),
   key: v.string(),
   name: v.string(),
   description: v.string(),

@@ -84,7 +84,7 @@ The Google web client must allow the canonical origin and the exact callback `<c
 ## Organizations, email and voice
 
 - `/organizations` manages real Better Auth organizations, active selection, members, roles and invitations. It is accessible without creating a personal workspace first.
-- The sidebar switches organizations and workspaces. Owner/admin roles create and rename organization workspaces; members can collaborate on project/task records. Existing private workspaces are not automatically made shared.
+- The sidebar switches organizations and workspaces. Owner/admin roles create and rename organization workspaces. Shared projects explicitly use `private: false` and allow workspace-member collaboration. Private projects default to lead-only access; their lead selects project members at creation or through **Manage project access**. Convex persists and enforces grants on project/task/comment reads and writes, and filters workspace-wide project/task/activity pages before returning rows. Missing legacy privacy fields remain private. Workspace admin status does not bypass private-project grants. Existing private workspaces are not automatically made shared.
 - `/accept-invitation` preserves its destination through Google/email sign-in, checks the invited address, and requires a verified email. Shared membership is always read from the auth component rather than trusted from a stale workspace-member mirror.
 - The local `convex/betterAuth` component preserves the original component name/tables and adds organization models. The app schema uses Convex Ents, retaining existing indices and adding workspace/project/member relationships.
 

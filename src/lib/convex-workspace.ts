@@ -15,7 +15,7 @@ export function workspaceData(
     members: members.map(person => ({ id: person._id, name: person.name, email: person.email, title: person.title, role: person.role, team: "", color: workspace.color, status: "active" as const, last: person.createdAt, tz: person.timeZone })),
     teams: [],
     projects: projects.map((project) => ({
-      id: project._id, key: project.key, name: project.name, icon: "folder-kanban", color: project.color, status: project.status, team: "", lead: project.leadId, due: project.due ?? "", start: project.start ?? "", fav: project.favorite, members: [project.leadId], desc: project.description, milestones: [], last: project.updatedAt, private: true, archived: project.archived,
+      id: project._id, key: project.key, name: project.name, icon: "folder-kanban", color: project.color, status: project.status, team: "", lead: project.leadId, due: project.due ?? "", start: project.start ?? "", fav: project.favorite, members: [...new Set([project.leadId, ...(project.memberIds ?? [])])], desc: project.description, milestones: [], last: project.updatedAt, private: project.private ?? true, archived: project.archived,
     })),
     tasks: tasks.map((task, index) => ({
       id: task._id, key: task.key, project: task.projectId, title: task.title, status: task.status, assignee: task.assigneeId, priority: task.priority, due: task.due, start: task.start, labels: task.labels, subtasks: task.subtasks, attachments: [], deps: [], desc: task.description, estimate: null, created: task.createdAt, updated: task.updatedAt, order: index, fav: task.favorite, recur: null, completedAt: task.completedAt ?? undefined, archived: task.archived,

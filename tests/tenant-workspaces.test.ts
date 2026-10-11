@@ -18,7 +18,7 @@ async function fixture() {
   const memberMembership = await addOrganizationMember(database, organization._id, member.user._id, "member");
   await addOrganizationMember(database, otherOrganization._id, outsider.user._id, "owner");
   const workspaceId = await owner.actor.mutation(api.workspaces.create, { organizationId: organization._id, name: "Alpha shared", profileName: owner.user.name });
-  const projectId = await owner.actor.mutation(api.projects.create, { workspaceId, name: "Organization project", key: "ORG" });
+  const projectId = await owner.actor.mutation(api.projects.create, { workspaceId, name: "Organization project", key: "ORG", private: false });
   const taskId = await owner.actor.mutation(api.tasks.create, { projectId, title: "Shared task", status: "todo", priority: "medium", assigneeId: null, labels: [] });
   return { database, owner, admin, member, outsider, organization, otherOrganization, workspaceId, projectId, taskId, ownerMembership, adminMembership, memberMembership };
 }

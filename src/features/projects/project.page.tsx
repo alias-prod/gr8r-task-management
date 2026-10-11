@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons/icon";
 import { Avatar, AvatarStack } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/chrome";
 import { Progress, ProjectStatusPill, StatusIcon } from "@/components/ui/status";
+import { ProjectAccessForm } from "./project-access-form";
 import { TaskBoard } from "@/features/tasks/components/task-board";
 import { TaskRow } from "@/features/tasks/components/task-row";
 import { ago, diffDays, formatDate, parseIso, relativeDate, today } from "@/lib/dates";
@@ -71,6 +72,7 @@ function ProjectScreen() {
           ))}
         </nav>
       </div>
+      <ProjectAccessForm key={project.id} project={project}/>
       {tab === "board" ? <TaskBoard tasks={tasks} /> : null}
       {tab === "list" ? (
         <div style={{ padding: "8px 20px 40px" }}>

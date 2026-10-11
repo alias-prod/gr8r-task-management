@@ -1,7 +1,7 @@
 import { paginationOptsValidator, paginationResultValidator } from "convex/server";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireAssignee, requireProject, requireTask, requireWorkspace } from "./access";
+import { filterProjectRecords, requireAssignee, requireProject, requireTask, requireWorkspace } from "./access";
 import { label, taskDoc, taskPriority, taskStatus } from "./model";
 import { date, dateRange, pagination, text } from "./validation";
 
@@ -13,7 +13,7 @@ export const list = query({
   },
   returns: paginationResultValidator(taskDoc),
   handler: async (ctx, args) => {
-    await requireWorkspace(ctx, args.workspaceId);
+    const access = await requireWorkspace(ctx, args.workspaceId);
     if (args.projectId) {
       const { project } = await requireProject(ctx, args.projectId);
       if (project.workspaceId !== args.workspaceId) {
@@ -26,12 +26,13 @@ export const list = query({
         .order("desc")
         .paginate(pagination(args.paginationOpts));
     }
-    return await ctx.db.query("tasks")
+    const result = await ctx.db.query("tasks")
       .withIndex("by_workspace_and_archived", (q) =>
         q.eq("workspaceId", args.workspaceId).eq("archived", false),
       )
       .order("desc")
       .paginate(pagination(args.paginationOpts));
+    return { ...result, page: await filterProjectRecords(ctx, result.page, access) };
   },
 });
 
@@ -57,7 +58,7 @@ export const create = mutation({
   handler: async (ctx, args) => {
     const { project, member } = await requireProject(ctx, args.projectId);
     if (project.archived) throw new ConvexError("Restore this project before adding tasks.");
-    await requireAssignee(ctx, project.workspaceId, args.assigneeId);
+    await requireAssignee(ctx, project.workspaceId, args.assigneeId, project);
     if (args.labels.length > 8) throw new ConvexError("Choose at most eight labels.");
     const start = date(args.start);
     const due = date(args.due);

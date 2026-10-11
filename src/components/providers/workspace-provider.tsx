@@ -77,6 +77,7 @@ function WorkspaceSession({ current, children }: { current: NonNullable<Function
   const createComment = useMutation(api.comments.create);
   const createTask = useMutation(api.tasks.create);
   const createProject = useMutation(api.projects.create);
+  const setProjectAccess = useMutation(api.projects.setAccess);
   const projectFavorite = useMutation(api.projects.setFavorite);
   const updateWorkspace = useMutation(api.workspaces.update);
   const updateProfile = useMutation(api.workspaces.updateProfile);
@@ -109,7 +110,8 @@ function WorkspaceSession({ current, children }: { current: NonNullable<Function
     addSubtask: async (id, title) => await run(() => createSubtask({ taskId: id as Id<"tasks">, title })) !== undefined,
     addComment: async (id, text) => await run(() => createComment({ taskId: id as Id<"tasks">, text })) !== undefined,
     addTask: (input) => run(() => createTask({ projectId: input.projectId as Id<"projects">, title: input.title, status: "todo", priority: input.priority, assigneeId: input.assignee ? input.assignee as Id<"members"> : null, due: input.due, labels: [] })),
-    addProject: (input) => run(() => createProject({ workspaceId, ...input })),
+    addProject: (input) => run(() => createProject({ workspaceId, ...input, memberIds: (input.memberIds ?? []).map(id => id as Id<"members">) })),
+    setProjectAccess: async (projectId, privateProject, memberIds) => await run(() => setProjectAccess({ projectId: projectId as Id<"projects">, private: privateProject, memberIds: memberIds.map(id => id as Id<"members">) })) !== undefined,
     toggleProjectFav: async (id) => await run(() => projectFavorite({ projectId: id as Id<"projects">, favorite: !data.projects.find((project) => project.id === id)?.fav })) !== undefined,
     markNotification: () => {},
     markAllRead: () => {},
