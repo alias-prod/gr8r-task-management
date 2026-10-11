@@ -11,5 +11,8 @@ export default defineConfig([
     "build/**",
     "next-env.d.ts",
     "convex/_generated/**",
+    "convex/betterAuth/_generated/**",
+    "voice-agent/dist/**",
+    "legacy/**",
   ]),
 ]);

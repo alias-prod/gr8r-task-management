@@ -1,0 +1,16 @@
+.page { padding: 32px; max-width: 1040px; margin: 0 auto; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 28px; }
+.eyebrow { font-size: 11px; letter-spacing: .08em; color: var(--text-3); margin: 0 0 8px; }
+.header h1 { font-size: 28px; margin: 0 0 8px; }
+.scope { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; white-space: nowrap; opacity: .75; padding-top: 8px; }
+.panel { border: 1px solid var(--border); border-radius: 12px; padding: 32px; min-height: 300px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.icon { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid var(--border); border-radius: 12px; }
+.panel h2 { font-size: 20px; margin: 0; }
+.description { max-width: 570px; line-height: 1.6; opacity: .7; margin: 0; }
+.status { min-height: 24px; margin: 0; line-height: 1.5; font-size: 13px; }
+.session { display: flex; flex-direction: column; gap: 16px; }
+.controls { display: flex; gap: 12px; flex-wrap: wrap; }
+.notes { margin-top: 28px; max-width: 640px; }
+.notes h2 { font-size: 14px; margin: 0 0 10px; }
+.notes ul { padding-left: 18px; margin: 0; opacity: .7; font-size: 13px; line-height: 1.8; }
+@media (max-width: 640px) { .page { padding: 20px 16px; } .header { flex-direction: column; gap: 8px; } .header h1 { font-size: 24px; } .panel { padding: 24px 20px; } .controls { width: 100%; } .controls button { flex: 1; min-height: 44px; } }

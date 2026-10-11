@@ -46,7 +46,7 @@ npm run dev
 
 Open [http://localhost:3003](http://localhost:3003).
 
-Sign in using Google or a real email/password account. Authentication and private workspace data are stored in Convex through Better Auth. Dashboard routes require an authenticated user; workspace operations verify ownership and membership.
+Sign in using Google or a real email/password account. Authentication and workspace data are stored in Convex through Better Auth. Personal workspaces remain private. Organizations use authoritative Better Auth membership and owner/admin/member roles; members share their organization's workspaces. Dashboard operations check both fresh database-session validity and tenant access, including after membership removal or role changes.
 
 ## Scripts
 
@@ -70,15 +70,31 @@ Configure each deployment environment separately. Never point production at the 
 | `NEXT_PUBLIC_CONVEX_URL` | Matching deployment's `.convex.cloud` URL, used by the browser and server helpers |
 | `NEXT_PUBLIC_CONVEX_SITE_URL` | Matching deployment's `.convex.site` HTTP-actions URL, required for auth routes at build time |
 | `CONVEX_DEPLOY_KEY` | Server-only deployment key for the intended Convex environment |
-| `GOOGLE_CLIENT_ID` | Google web-application OAuth client ID, not an iOS/Android client ID |
-| `GOOGLE_CLIENT_SECRET` | Server-only secret, stored as a Vercel Secret |
-| `BETTER_AUTH_SECRET` | Server-only Better Auth signing/encryption secret |
+| `LIVEKIT_URL` | Approved LiveKit project's WebSocket URL |
+| `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | Server-only project credentials |
+| `LIVEKIT_AGENT_NAME` | Explicit dispatch name of the separately deployed voice worker |
+| `LIVEKIT_DISPATCH_SECRET` | Separate server/worker dispatch-proof secret, at least 32 characters |
 
 ### Convex backend
 
-Set `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` in the corresponding Convex deployment too. Set `BETTER_AUTH_URL` to the canonical app origin and `AUTH_ENV=production` in production. Convex supplies its own platform `CONVEX_SITE_URL`; that does not populate Next.js's `NEXT_PUBLIC_CONVEX_SITE_URL`.
+Set `BETTER_AUTH_SECRET`, the web-application `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` in the corresponding Convex deployment. These authentication credentials are consumed by Convex, not enabled by Vercel-only copies. Set `BETTER_AUTH_URL` to the canonical app origin and `AUTH_ENV=production` in production. Convex supplies its own platform `CONVEX_SITE_URL`; that does not populate Next.js's `NEXT_PUBLIC_CONVEX_SITE_URL`.
 
 The Google web client must allow the canonical origin and the exact callback `<canonical-origin>/api/auth/callback/google`. Keep existing callbacks when adding this app to a shared client.
+
+## Organizations, email and voice
+
+- `/organizations` manages real Better Auth organizations, active selection, members, roles and invitations. It is accessible without creating a personal workspace first.
+- The sidebar switches organizations and workspaces. Owner/admin roles create and rename organization workspaces; members can collaborate on project/task records. Existing private workspaces are not automatically made shared.
+- `/accept-invitation` preserves its destination through Google/email sign-in, checks the invited address, and requires a verified email. Shared membership is always read from the auth component rather than trusted from a stale workspace-member mirror.
+- The local `convex/betterAuth` component preserves the original component name/tables and adds organization models. The app schema uses Convex Ents, retaining existing indices and adding workspace/project/member relationships.
+
+### Resend component
+
+Configure `RESEND_API_KEY`, `RESEND_FROM`, and `RESEND_EMAIL_ENABLED=true` in **Convex** only after confirming the key's intended scope and verifying the sender domain. Until then, password signup and invitations are disabled; Google and existing password login remain available. Verification, recovery and invitations use durable real email enqueue, not mock delivery. A queued message does not prove final delivery; verify receipt before declaring the email rollout complete. No subscription upgrade or DNS change is implied by deploying this code.
+
+### LiveKit worker
+
+See [`voice-agent/README.md`](voice-agent/README.md). The web app and long-running worker are separate deployments. Keep voice disabled until the owned project, worker hosting/quota, dispatch name, shared dispatch proof and inference allocation are confirmed. The endpoint authenticates and authorizes the workspace, checks origin, enforces a durable 30-second per-workspace cooldown and aggregate six-per-user/hour admission ceiling, then issues a short microphone-only token for an opaque room. The worker validates signed dispatch metadata before starting inference, has a ten-minute maximum session, no task API capabilities and no app recording/transcript storage. Existing workers are never replaced automatically. Provider/project retention policies require separate review.
 
 ## Deployment
 

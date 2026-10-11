@@ -1,26 +1,16 @@
 /// <reference types="vite/client" />
-import { convexTest } from "convex-test";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../convex/_generated/api";
-import schema from "../convex/schema";
+import { authActor, configureAuthTestEnvironment, testDatabase } from "./helpers/auth-fixture";
 
-const modules = import.meta.glob(["../convex/**/*.{ts,js}", "!../convex/**/*.d.ts"]);
+beforeEach(configureAuthTestEnvironment);
+afterEach(() => vi.unstubAllEnvs());
 const page = { cursor: null, numItems: 25 };
 
 async function fixture() {
-  const database = convexTest(schema, modules);
-  const owner = database.withIdentity({
-    subject: "owner-a",
-    issuer: "https://auth.example.test",
-    tokenIdentifier: "https://auth.example.test|owner-a",
-    email: "owner-a@example.test",
-  });
-  const outsider = database.withIdentity({
-    subject: "owner-b",
-    issuer: "https://auth.example.test",
-    tokenIdentifier: "https://auth.example.test|owner-b",
-    email: "owner-b@example.test",
-  });
+  const database = testDatabase();
+  const { actor: owner } = await authActor(database, "owner-a");
+  const { actor: outsider } = await authActor(database, "owner-b");
   const workspaceId = await owner.mutation(api.workspaces.create, {
     name: "Private workspace", profileName: "Owner A",
   });
@@ -52,8 +42,8 @@ describe("private workspace authorization", () => {
   });
 
   it("creates a workspace and its owner once, without sample projects", async () => {
-    const database = convexTest(schema, modules);
-    const owner = database.withIdentity({ subject: "new-owner" });
+    const database = testDatabase();
+    const { actor: owner } = await authActor(database, "new-owner");
     const first = await owner.mutation(api.workspaces.create, { name: "My workspace", profileName: "Owner" });
     const second = await owner.mutation(api.workspaces.create, { name: "Different name", profileName: "Different owner" });
     expect(second).toBe(first);

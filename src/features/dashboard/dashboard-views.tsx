@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons/icon";
 import { Avatar, AvatarStack } from "@/components/ui/avatar";
 import { PageHeader } from "@/components/ui/chrome";
@@ -81,13 +82,15 @@ export function PersonalDashboardPage() {
 }
 
 export function CompanyDashboardPage() {
+  const [clock,setClock]=useState(()=>Date.now());
+  useEffect(()=>{const timer=setInterval(()=>setClock(Date.now()),60_000);return ()=>clearInterval(timer);},[]);
   const data = useWorkspaceData();
   const person = me(data);
   const projects = visibleProjects(data).filter((project) => canSee(data, project) && project.status !== "complete");
   const tasks = allTasks(data);
   const open = tasks.filter((task) => task.status !== "done");
   const overdue = tasks.filter(isOverdue);
-  const doneWeek = tasks.filter((task) => task.status === "done" && task.completedAt && Date.now() - task.completedAt < 7 * 864e5);
+  const doneWeek = tasks.filter((task) => task.status === "done" && task.completedAt && clock - task.completedAt < 7 * 864e5);
 
   return (
     <div className="page">

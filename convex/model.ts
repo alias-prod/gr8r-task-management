@@ -37,6 +37,7 @@ export const label = v.union(
 );
 
 export const workspaceFields = {
+  organizationId: v.optional(v.string()),
   ownerId: v.string(),
   name: v.string(),
   color,
@@ -47,11 +48,12 @@ export const workspaceFields = {
 export const memberFields = {
   workspaceId: v.id("workspaces"),
   userId: v.string(),
+  authUserId: v.optional(v.string()),
   name: v.string(),
   email: v.string(),
   title: v.string(),
   timeZone: v.string(),
-  role: v.literal("Owner"),
+  role: v.union(v.literal("Owner"), v.literal("Admin"), v.literal("Member")),
   createdAt: v.number(),
 };
 

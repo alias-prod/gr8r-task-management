@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import WorkspacePicker from "./workspace-picker";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/icons/icon";
 import { Avatar } from "@/components/ui/avatar";
@@ -29,6 +30,7 @@ const WORKSPACE = [
   { href: "/timeline", label: "Timeline", icon: "chart-gantt" },
   { href: "/members", label: "Members", icon: "users" },
   { href: "/activity", label: "Activity", icon: "activity" },
+  { href: "/voice", label: "Voice agent", icon: "mic" },
 ];
 
 function active(pathname: string, href: string) {
@@ -85,6 +87,7 @@ export default function Sidebar() {
           )}
         </div>
       </div>
+      {!collapsed ? <WorkspacePicker /> : null}
       <div className="side-scroll">
         {collapsed ? (
           <button className="sitem" onClick={toggleSide} aria-label="Expand sidebar">

@@ -48,10 +48,10 @@ function lookup(name: string) {
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join("");
-  return table[pascal] || table[ALIAS[name] || ""] || Lucide.Circle;
+  return pascal;
 }
 
 export function Icon({ name, size = 16, className = "" }: { name: string; size?: number; className?: string }) {
-  const Cmp = lookup(name);
+  const Cmp = table[lookup(name)] || Lucide.Circle;
   return <Cmp className={`i ${className}`.trim()} size={size} strokeWidth={1.8} aria-hidden />;
 }

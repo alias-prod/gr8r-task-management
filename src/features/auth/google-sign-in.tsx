@@ -6,6 +6,8 @@ import { useQuery } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { api } from "../../../convex/_generated/api";
 
+import { googleAuthURLs } from "@/features/organizations/auth-return";
+
 const signInError = "Unable to sign in with Google. Please try again or use your email and password.";
 
 function GoogleSignInControl({ signup }: { signup: boolean }) {
@@ -23,10 +25,12 @@ function GoogleSignInControl({ signup }: { signup: boolean }) {
     setError("");
     setStandaloneURL("");
 
+    const urls = googleAuthURLs(config.authOrigin, signup, searchParams.get("next"));
+
     if (window.self !== window.top || window.location.origin !== config.authOrigin) {
       // Google's account chooser cannot run inside the embedded preview.
       // Start on the canonical origin so OAuth state and callback cookies match.
-      const url = new URL(signup ? "/signup" : "/login", config.authOrigin).href;
+      const url = urls.standaloneURL;
       window.open(url, "_blank", "noopener,noreferrer");
       setStandaloneURL(url);
       return;
@@ -36,9 +40,9 @@ function GoogleSignInControl({ signup }: { signup: boolean }) {
     try {
       const result = await authClient.signIn.social({
         provider: "google",
-        callbackURL: new URL("/", config.authOrigin).href,
-        newUserCallbackURL: new URL("/", config.authOrigin).href,
-        errorCallbackURL: new URL(`${signup ? "/signup" : "/login"}?error=google`, config.authOrigin).href,
+        callbackURL: urls.callbackURL,
+        newUserCallbackURL: urls.callbackURL,
+        errorCallbackURL: urls.errorCallbackURL,
       });
       if (result.error || !result.data?.url) {
         setError(signInError);

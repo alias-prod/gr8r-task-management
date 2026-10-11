@@ -7,11 +7,12 @@ export function workspaceData(
   projects: Doc<"projects">[],
   tasks: Doc<"tasks">[],
   activity: Doc<"activity">[],
+  members: Doc<"members">[] = [member],
 ): WorkspaceData {
   return {
     ws: { name: workspace.name, url: workspace._id, color: workspace.color, brand: true },
     me: member._id,
-    members: [{ id: member._id, name: member.name, email: member.email, title: member.title, role: member.role, team: "", color: workspace.color, status: "active", last: member.createdAt, tz: member.timeZone }],
+    members: members.map(person => ({ id: person._id, name: person.name, email: person.email, title: person.title, role: person.role, team: "", color: workspace.color, status: "active" as const, last: person.createdAt, tz: person.timeZone })),
     teams: [],
     projects: projects.map((project) => ({
       id: project._id, key: project.key, name: project.name, icon: "folder-kanban", color: project.color, status: project.status, team: "", lead: project.leadId, due: project.due ?? "", start: project.start ?? "", fav: project.favorite, members: [project.leadId], desc: project.description, milestones: [], last: project.updatedAt, private: true, archived: project.archived,
